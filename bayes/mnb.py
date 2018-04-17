@@ -5,11 +5,15 @@ import re
 class MultinomialNB():
     CLEAN_PATTERN = re.compile(r"[^(a-zA-Z0-9_)+\s]")
     SPLIT_PATTERN = re.compile(r"\s+")
-    
+
     def __init__(self):
-        self.vocab = set()
+        self.vocabulary = set()
+        self.vocabularyCount = 0
         self.totalDocuments = 0
-        self.categories = {}
+        self.categories = set()
+        self.categoriesDocuments = {}
+        self.categoriesTokenCounts = {}
+        self.categoriesVocabulary = {}
 
     def getTokenFrequency(self, tokens):
         res = {}
@@ -18,9 +22,9 @@ class MultinomialNB():
         return res
 
     def getLikelihood(self, token, category):
-        tokenCount = self.categories[category]["tokenFrequency"][token] if token in self.categories[category]["tokenFrequency"] else 0
-        totalCategoryWords = self.categories[category]["totalTokenCount"]
-        return np.log( ( tokenCount + 1 ) / ( totalCategoryWords + len(self.vocab) ) )
+        tokenCount = self.categoriesVocabulary[category][token] if token in self.categoriesVocabulary[category] else 0
+        totalCategoryWords = self.categoriesTokenCounts[category]
+        return np.log( ( tokenCount + 1 ) / ( totalCategoryWords + self.vocabularyCount ) )
 
     def tokenize(self, text):
         text = text.rstrip().lower()
@@ -29,23 +33,28 @@ class MultinomialNB():
 
     def train(self, text, category):
         if category not in self.categories:
-            self.categories[category] = { "documents": 0, "totalTokenCount": 0, "tokenFrequency": {} }
-        
+            self.categories.add(category)
+            self.categoriesDocuments[category] = 0
+            self.categoriesTokenCounts[category] = 0
+            self.categoriesVocabulary[category] = {}
+
         self.totalDocuments += 1
-        self.categories[category]["documents"] += 1
+        self.categoriesDocuments[category] += 1
 
         tokens = self.tokenize(text)
         textTokensFrequency = self.getTokenFrequency(tokens)
 
         for token in textTokensFrequency:
-            if token not in self.vocab:
-                self.vocab.add(token)
-            if token not in self.categories[category]["tokenFrequency"]:
-                self.categories[category]["tokenFrequency"][token] = textTokensFrequency[token]
+            if token not in self.vocabulary:
+                self.vocabulary.add(token)
+                self.vocabularyCount += 1
+
+            if token not in self.categoriesVocabulary[category]:
+                self.categoriesVocabulary[category][token] = textTokensFrequency[token]
             else:
-                self.categories[category]["tokenFrequency"][token] += textTokensFrequency[token]
-            
-            self.categories[category]["totalTokenCount"] += textTokensFrequency[token]
+                self.categoriesVocabulary[category][token] += textTokensFrequency[token]
+
+            self.categoriesTokenCounts[category] += textTokensFrequency[token]
 
     def predict(self, text):
         resCategory = None
@@ -55,12 +64,10 @@ class MultinomialNB():
         textTokensFrequency = self.getTokenFrequency(tokens)
 
         for category in self.categories:
-            currProb = np.log(self.categories[category]["documents"] / self.totalDocuments)
-            
+            currProb = np.log(self.categoriesDocuments[category] / self.totalDocuments)
+
             for token in tokens:
-                likelihood = self.getLikelihood(token, category)
-                currFrequncy = textTokensFrequency[token]
-                currProb += currFrequncy * likelihood
+                currProb += textTokensFrequency[token] * self.getLikelihood(token, category)
 
             if currProb > maxProb:
                 maxProb = currProb
@@ -77,7 +84,7 @@ with open("./resources/train_set.txt") as train_file:
         line = train_file.readline()
 
 print("Training completed. Start validating...")
-print(len(nb.vocab))
+print(nb.vocabularyCount)
 correct = 0
 total = 0
 with open("./resources/validation_set.txt") as validation_file:
