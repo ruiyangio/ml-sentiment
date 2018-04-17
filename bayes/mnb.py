@@ -3,7 +3,7 @@ import math
 import re
 
 class MultinomialNB():
-    CLEAN_PATTERN = re.compile(r"[^(a-zA-ZA-Яa-я0-9_)+\s]")
+    CLEAN_PATTERN = re.compile(r"[^(a-zA-Z0-9_)+\s]")
     SPLIT_PATTERN = re.compile(r"\s+")
     
     def __init__(self):
