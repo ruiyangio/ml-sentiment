@@ -19,7 +19,7 @@ class MultinomialNB():
 
     def getLikelihood(self, token, category):
         tokenCount = self.categories[category]["tokenFrequency"][token] if token in self.categories[category]["tokenFrequency"] else 0
-        totalCategoryWords = self.categories[category]["totalWords"]
+        totalCategoryWords = self.categories[category]["totalTokenCount"]
         return np.log( ( tokenCount + 1 ) / ( totalCategoryWords + len(self.vocab) ) )
 
     def tokenize(self, text):
@@ -29,7 +29,7 @@ class MultinomialNB():
 
     def train(self, text, category):
         if category not in self.categories:
-            self.categories[category] = { "documents": 0, "totalWords": 0, "tokenFrequency": {} }
+            self.categories[category] = { "documents": 0, "totalTokenCount": 0, "tokenFrequency": {} }
         
         self.totalDocuments += 1
         self.categories[category]["documents"] += 1
@@ -45,7 +45,7 @@ class MultinomialNB():
             else:
                 self.categories[category]["tokenFrequency"][token] += textTokensFrequency[token]
             
-            self.categories[category]["totalWords"] += textTokensFrequency[token]
+            self.categories[category]["totalTokenCount"] += textTokensFrequency[token]
 
     def predict(self, text):
         resCategory = None
@@ -76,6 +76,8 @@ with open("./resources/train_set.txt") as train_file:
         nb.train(parts[0], parts[1])
         line = train_file.readline()
 
+print("Training completed. Start validating...")
+print(len(nb.vocab))
 correct = 0
 total = 0
 with open("./resources/validation_set.txt") as validation_file:
