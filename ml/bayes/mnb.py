@@ -1,11 +1,8 @@
 import numpy as np
 import math
-import re
+from util import Util
 
 class MultinomialNB():
-    CLEAN_PATTERN = re.compile(r"[^(a-zA-Z0-9_)+\s]")
-    SPLIT_PATTERN = re.compile(r"\s+")
-
     def __init__(self):
         self.vocabulary = set()
         self.vocabularyCount = 0
@@ -27,9 +24,7 @@ class MultinomialNB():
         return np.log( ( tokenCount + 1 ) / ( totalCategoryWords + self.vocabularyCount ) )
 
     def tokenize(self, text):
-        text = text.rstrip().lower()
-        text = self.CLEAN_PATTERN.sub(" ", text)
-        return self.SPLIT_PATTERN.split(text)
+        return Util.defaultTokenize(text)
 
     def train(self, text, category):
         if category not in self.categories:
@@ -74,26 +69,3 @@ class MultinomialNB():
                 resCategory = category
 
         return resCategory
-
-nb = MultinomialNB()
-with open("./resources/train_set.txt") as train_file:
-    line = train_file.readline()
-    while line:
-        parts = line.split("@@@@")
-        nb.train(parts[0], parts[1])
-        line = train_file.readline()
-
-print("Training completed. Start validating...")
-print(nb.vocabularyCount)
-correct = 0
-total = 0
-with open("./resources/validation_set.txt") as validation_file:
-    line = validation_file.readline()
-    while line:
-        total += 1
-        parts = line.split("@@@@")
-        if parts[1] == nb.predict(parts[0]):
-            correct += 1
-        line = validation_file.readline()
-
-print(correct / total)
