@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from util import Util
 
 class SkLogistic(object):
     LABEL_SEPRATOR = "@@@@"
@@ -19,24 +20,7 @@ class SkLogistic(object):
         self.clf = None
 
     def train_and_validate(self):
-        target = []
-        with open(self.train_file_path, "r") as train_file:
-            train_content = train_file.readlines()
-
-        for i, line in enumerate(train_content):
-            line = line.rstrip().lower()
-            parts = line.split(self.LABEL_SEPRATOR)
-            s = parts[0]
-            label = parts[1]
-
-            if label == self.LABEL_POSITIVE:
-                target.append(1)
-            else:
-                target.append(0)
-            train_content[i] = s
-        
-        train_counts = self.vocab_vec.fit_transform(train_content)
-        train_tfidf = self.tfidf_transformer.fit_transform(train_counts)
+        train_tfidf, target = Util.getFeatureFromFile(self.train_file_path)
         docs_train, docs_test, y_train, y_test = train_test_split(train_tfidf, target, test_size = 0.40, random_state = 12)
         self.clf = LogisticRegression().fit(docs_train, y_train)
         y_pred = self.clf.predict(docs_test)
