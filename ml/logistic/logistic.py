@@ -2,7 +2,7 @@ import numpy as np
 import sklearn
 
 class LogisticRegression(object):
-    def __init__(self, max_iteration = 2000, learning_rate = 1e-5, add_intercept = False):
+    def __init__(self, max_iteration = 2000, learning_rate = 1e-5, add_intercept = True):
         self.max_iteration = max_iteration
         self.learning_rate = learning_rate
         self.add_intercept = add_intercept
@@ -12,12 +12,11 @@ class LogisticRegression(object):
         return 1.0 / (1 + np.exp(-x))
 
     def train(self, x, y):
-        x = np.array(x.toarray())
         if self.add_intercept:
             intercept = np.ones((x.shape[0], 1))
-            x = np.hstack((intercept, x))    
-        self.w = np.zeros(x.shape[1])
+            x = np.hstack((intercept, x))
 
+        self.w = np.zeros(x.shape[1])
         for i in range(self.max_iteration):
             weights = np.dot(x, self.w)
             res = self.sigmoid(weights)
@@ -29,7 +28,10 @@ class LogisticRegression(object):
         print("train complete")
 
     def test(self, x, y):
-        x = np.array(x.toarray())
+        if self.add_intercept:
+            intercept = np.ones((x.shape[0], 1))
+            x = np.hstack((intercept, x))
+
         scores = np.dot(x, self.w)
         y_pred = np.round(self.sigmoid(scores))
         return sklearn.metrics.accuracy_score(y, y_pred)

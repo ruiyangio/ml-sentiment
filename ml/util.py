@@ -76,12 +76,12 @@ class Util(object):
         vectorizer = CountVectorizer(min_df=2, tokenizer=Util.defaultTokenize)
         tfidfTransformer = TfidfTransformer()
         countFeature = vectorizer.fit_transform(dataContent)
-        tfIdfFeature = tfidfTransformer.fit_transform(countFeature)
+        tfIdfFeature = np.array(tfidfTransformer.fit_transform(countFeature).toarray())
         target = np.array(target)
 
         return (tfIdfFeature, target)
 
     @staticmethod
-    def getTrainTestFeatureFromFile(dataPath, split = 0.20):
+    def getTrainTestFeatureFromFile(dataPath, split = 0.30):
         tfIdfFeature, target = Util.getFeatureFromFile(dataPath)
         return train_test_split(tfIdfFeature, target, test_size = split, random_state = 12)
