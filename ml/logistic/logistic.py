@@ -2,7 +2,7 @@ import numpy as np
 import sklearn
 
 class LogisticRegression(object):
-    def __init__(self, max_iteration = 2000, learning_rate = 5e-5, add_intercept = False):
+    def __init__(self, max_iteration = 2000, learning_rate = 1e-5, add_intercept = False):
         self.max_iteration = max_iteration
         self.learning_rate = learning_rate
         self.add_intercept = add_intercept

@@ -1,4 +1,5 @@
 import os
+import time
 from bayes.skmnb import SkMultinomialNB
 from logistic.sklogistic import SkLogistic
 from svm.sksvm import SkSvm
@@ -18,7 +19,12 @@ small_set_path = script_dir + "/../resources/small_set.txt"
 # svm = SkSvm(train_set_path, validation_set_path)
 # svm.train_and_validate()
 
+t0 = time.time()
 x, testX, y, testY = Util.getTrainTestFeatureFromFile(all_set_path)
 model = LogisticRegression()
 model.train(x, y)
+t1 = time.time()
+print("Train time:" + str(t1-t0))
 print(model.test(testX, testY))
+t2 = time.time()
+print("Test time:" + str(t1-t0))
