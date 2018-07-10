@@ -1,5 +1,7 @@
 import numpy as np
-import sklearn
+from scipy import sparse
+from sklearn.metrics import accuracy_score
+from modelbase import ModelBase
 
 class LogisticRegression(object):
     def __init__(self, max_iteration = 2000, learning_rate = 1e-5, add_intercept = True):
@@ -11,27 +13,29 @@ class LogisticRegression(object):
     def sigmoid(self, x):
         return 1.0 / (1 + np.exp(-x))
 
-    def train(self, x, y):
+    def fit(self, x, y):
         if self.add_intercept:
             intercept = np.ones((x.shape[0], 1))
-            x = np.hstack((intercept, x))
+            x = sparse.hstack((intercept, x))
 
         self.w = np.zeros(x.shape[1])
         for i in range(self.max_iteration):
-            weights = np.dot(x, self.w)
-            res = self.sigmoid(weights)
-
-            error = y - res
-            # gradient descent
-            grad = np.dot(x.T, error)
-            self.w += self.learning_rate * grad
+            scores = x.dot(self.w)
+            y_pred = self.sigmoid(scores)
+            error = y - y_pred
+            gradient = x.T.dot(error)
+            self.w += self.learning_rate * gradient
         print("train complete")
-
-    def test(self, x, y):
+    
+    def predict(self, x):
         if self.add_intercept:
             intercept = np.ones((x.shape[0], 1))
-            x = np.hstack((intercept, x))
+            x = sparse.hstack((intercept, x))
 
-        scores = np.dot(x, self.w)
-        y_pred = np.round(self.sigmoid(scores))
-        return sklearn.metrics.accuracy_score(y, y_pred)
+        scores = x.dot(self.w)
+        return np.round(self.sigmoid(scores))
+
+class MyLogisticRegression(ModelBase):
+    def __init__(self):
+        ModelBase.__init__(self)
+        self.model = LogisticRegression()
