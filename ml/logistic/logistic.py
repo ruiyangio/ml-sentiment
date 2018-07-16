@@ -13,6 +13,11 @@ class LogisticRegression(object):
     def sigmoid(self, x):
         return 1.0 / (1 + np.exp(-x))
 
+    def cost(self, y, y_pred):
+        n_sample = y.shape[0]
+        cross_entropy = -y * np.log(y_pred) - (1 - y) * np.log(1 - y_pred)
+        return cross_entropy.sum() / n_sample
+
     def fit(self, x, y):
         if self.add_intercept:
             intercept = np.ones((x.shape[0], 1))
@@ -25,6 +30,9 @@ class LogisticRegression(object):
             error = y - y_pred
             gradient = x.T.dot(error)
             self.w += self.learning_rate * gradient
+
+            if i % 100 == 0:
+                print("it: " + str(i) + " cost: " + str(self.cost(y, y_pred)))
         print("train complete")
     
     def predict(self, x):
