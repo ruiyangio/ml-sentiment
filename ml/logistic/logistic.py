@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score
 from modelbase import ModelBase
 
 class LogisticRegression(object):
-    def __init__(self, max_iteration = 2000, learning_rate = 1e-5, add_intercept = True):
+    def __init__(self, max_iteration = 10000, learning_rate = 3e-5, add_intercept = True):
         self.max_iteration = max_iteration
         self.learning_rate = learning_rate
         self.add_intercept = add_intercept
@@ -30,11 +30,8 @@ class LogisticRegression(object):
             error = y - y_pred
             gradient = x.T.dot(error)
             self.w += self.learning_rate * gradient
-
-            if i % 100 == 0:
-                print("it: " + str(i) + " cost: " + str(self.cost(y, y_pred)))
         print("train complete")
-    
+
     def predict(self, x):
         if self.add_intercept:
             intercept = np.ones((x.shape[0], 1))

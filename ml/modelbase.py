@@ -1,5 +1,6 @@
 from sklearn.metrics import accuracy_score
 from extractor import FeatureExtractor
+from sklearn.metrics import confusion_matrix
 
 class ModelBase(object):
     def __init__(self):
@@ -13,4 +14,5 @@ class ModelBase(object):
     def validate(self, data_path):
         x, y = self.feature_extractor.transform(data_path)
         y_pred = self.model.predict(x)
-        return accuracy_score(y, y_pred)
+        print(confusion_matrix(y, y_pred))
+        print(accuracy_score(y, y_pred))
